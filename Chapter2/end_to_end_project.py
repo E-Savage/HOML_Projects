@@ -102,3 +102,43 @@ train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
 # the remaining surveys go to males 
 # these groups are called strata
 
+# this is done to avoid sampling bias which is when the sample is not representative of the population
+# the next snippet is a way of splitting the data into strata based on the median income
+# this is a way of making sure the data is representative of the population
+housing["income_cat"] = pd.cut(housing["median_income"],
+                               bins=[0., 1.5, 3.0, 4.5, 6., np.inf],
+                               labels=[1, 2, 3, 4, 5])
+
+# making some graphs to represent the new categories that we just made
+housing["income_cat"].value_counts().sort_index().plot.bar(rot=0, grid=True)
+plt.xlabel("Income Category")
+plt.ylabel("Number of districts")
+plt.show()
+
+# now it is time to make a splitter that splits the data into different strata
+from sklearn.model_selection import StratifiedShuffleSplit
+
+splitter = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+strat_splits=[]
+for train_index, test_index in splitter.split(housing, housing["income_cat"]):
+    strat_train_set_n = housing.iloc[train_index]
+    strat_test_set_n = housing.iloc[test_index]
+    strat_splits.append((strat_train_set_n, strat_test_set_n))
+
+# just using the first split we have
+strat_train_set, strat_test_set = strat_splits[0]
+
+# another way to accomplish stratifying
+#                                                   arrays,  size of val set, the seed, using the income_cat as classifiers
+strat_train_set, strat_test_set = train_test_split(housing, test_size=0.2, random_state=42, stratify=housing["income_cat"])
+
+print(strat_test_set["income_cat"].value_counts() / len(strat_test_set))
+
+
+# now that we have the data we can start to explore it a bit more
+# now we will not be using the income_cat we can drop it from the set 
+for set_ in (strat_train_set, strat_test_set):
+    set_.drop("income_cat", axis=1, inplace=True)  # axis=1 is for columns, axis=0 is for rows
+
+    
+

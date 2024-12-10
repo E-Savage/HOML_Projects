@@ -4,6 +4,9 @@ import tarfile
 import urllib.request
 
 
+## hello there you are probably wondering what this is, well this is a python script that is going to be used to explore the housing dataset
+
+
 """ 
     this function loads in data as name suggests but it does something interesting
 """
